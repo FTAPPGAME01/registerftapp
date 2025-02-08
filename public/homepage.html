@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomePage</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            
+        }
+        .background {
+            width: 100%;
+            height: 100vh;
+            background-image: url('./assents/Purple\ and\ White\ Playful\ Video\ Games\ Day\ Instagram\ Post\ \(Post\ de\ Facebook\ \(Horizontal\)\)\ \(Tu\ historia\)\ \(3\).gif');
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .banner {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: red;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-bottom: 500px; /* Reducido el margen inferior */
+            width: 90%;
+        }
+        .menuItem {
+            background-color: red;
+            padding: 10px;
+            border-radius: 15px;
+        }
+        .menuImage {
+            width: 35px; /* Ancho deseado */
+            height: auto; /* Altura ajustada automáticamente */
+        }
+        .menuText {
+            font-size: 24px;
+        }
+        .bottomButtons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 50px;
+            width: 90%; /* Reducido el ancho */
+        }
+        .bottomButton {
+            background-color: transparent;
+            padding: 15px 30px; /* Aumentado el espaciado horizontal */
+            border-radius: 30px;
+            width: auto; /* Ancho automático */
+            align-items: center;
+            border: 1px solid white;
+        }
+        .bottomButtonText {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .modalContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modalContent {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            text-align: center;
+        }
+        .modalTitle {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .modalText {
+            margin-bottom: 10px;
+        }
+        .input {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <div class="container">
+            <div class="banner">
+                <div class="menuItem" onclick="handleContactUs()">
+                    <img src="./assents/icons8-whatsapp-36(-ldpi).png" alt="WhatsApp Icon" class="icon">
+                </div>
+                <div class="menuItem" onclick="window.location.href = './fotbolFT.html'">
+                    <span class="menuText" style="font-size: 33px;">⚽</span> <!-- Ahora este lleva a game.html -->
+                </div>
+                <div class="menuItem" onclick="window.location.href = 'https://www.facebook.com/share/wx1NZB12UP3gEqeL/?mibextid=qi2Omg'">
+                    <img src="./assents/facebook.png" alt="Facebook Logo" class="menuImage"> <!-- Cambiado a imagen -->
+                </div>
+                <!-- <div class="menuItem" onclick="onGoToSplashScreen()">
+                    <span class="menuText">🚪</span>
+                </div> -->
+                <div class="menuItem" onclick="window.location.href = './index.html'">
+                    <span class="menuText">🚪</span> <!-- Ahora este lleva a game.html -->
+                </div>
+            </div>
+            <div class="bottomButtons">
+                <div class="bottomButton" onclick="window.location.href = './game.html'">
+                    <span class="bottomButtonText">Mesa Multijugador</span>
+                </div>
+                <div class="bottomButton" onclick="window.location.href = './juegoen famili.html'">
+                    <span class="bottomButtonText">Juego En Familia</span>
+                </div>
+                
+            </div>
+            <div class="modalContainer" id="modalContainer" style="display: none;">
+                <div class="modalContent">
+                    <div class="modalTitle">Ingrese el PIN</div>
+                    <div class="modalText">Comunícate con tu administrador para obtener el PIN.</div>
+                    <input type="text" class="input" id="pinInput" placeholder="PIN">
+                    <button onclick="handleCheckPin()">Ingresar</button>
+                    <button onclick="closeModal()" style="color: red;">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Implementar lazy loading para scripts externos
+const loadScript = (src) => {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.body.appendChild(script);
+    });
+};
+
+// Cachear elementos del DOM
+const domElements = {};
+const cacheDOM = () => {
+    const elements = [
+        'googleServicesModal',
+        'saldoModal',
+        'saldoButton',
+        'closeSaldoModal',
+        'saldoInfo',
+        'puntosRegistrarse',
+        'insufficientBalanceModal',
+        'rulesModal',
+        'playersModal',
+        'registerModal',
+        'registrationForm',
+        'loginForm'
+    ];
+    
+    elements.forEach(id => {
+        domElements[id] = document.getElementById(id);
+    });
+};
+
+// Implementar debounce para funciones frecuentes
+const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+};
+
+// Optimizar el almacenamiento local usando batch operations
+const storage = {
+    batch: {},
+    timeout: null,
+    
+    set: function(key, value) {
+        this.batch[key] = value;
+        this.scheduleSave();
+    },
+    
+    scheduleSave: function() {
+        if (this.timeout) clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => this.saveBatch(), 1000);
+    },
+    
+    saveBatch: function() {
+        for (const [key, value] of Object.entries(this.batch)) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+        this.batch = {};
+    }
+};
+
+// Optimizar la gestión de jugadores
+class PlayerManager {
+    constructor() {
+        this.players = new Map();
+        this.loadFromStorage();
+    }
+
+    loadFromStorage() {
+        try {
+            const savedPlayers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+            Object.entries(savedPlayers).forEach(([username, data]) => {
+                this.players.set(username, data);
+            });
+        } catch (error) {
+            console.error('Error loading players:', error);
+            this.players.clear();
+        }
+    }
+
+    saveToStorage() {
+        storage.set('registeredUsers', Object.fromEntries(this.players));
+    }
+
+    addPlayer(username, data) {
+        this.players.set(username, data);
+        this.saveToStorage();
+    }
+}
+
+// Implementar sistema de caché para datos frecuentes
+const gameCache = {
+    data: new Map(),
+    
+    set: function(key, value, ttl = 300000) { // TTL default 5 minutos
+        this.data.set(key, {
+            value,
+            expires: Date.now() + ttl
+        });
+    },
+    
+    get: function(key) {
+        const item = this.data.get(key);
+        if (!item) return null;
+        if (Date.now() > item.expires) {
+            this.data.delete(key);
+            return null;
+        }
+        return item.value;
+    }
+};
+
+// Optimizar la carga inicial
+document.addEventListener('DOMContentLoaded', async () => {
+    // Cachear elementos DOM
+    cacheDOM();
+    
+    // Cargar scripts externos de forma asíncrona
+    try {
+        await Promise.all([
+            loadScript('https://connect.facebook.net/en_US/sdk.js'),
+            // Agregar otros scripts externos aquí
+        ]);
+    } catch (error) {
+        console.error('Error loading external scripts:', error);
+    }
+    
+    // Inicializar el juego
+    const playerManager = new PlayerManager();
+    loadRegisteredPlayers();
+    loadGameState();
+    startGame();
+});
+
+// Optimizar actualizaciones de UI
+const updateUI = debounce(() => {
+    renderGameState();
+    updateTurnIndicator();
+    renderInfo();
+}, 100);
+
+// Implementar Service Worker para caché de assets
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+            console.log('ServiceWorker registered');
+        })
+        .catch(error => {
+            console.error('ServiceWorker registration failed:', error);
+        });
+}
+
+// Service Worker para cachear assets
+const CACHE_NAME = 'ftappgame-v1';
+const urlsToCache = [
+    '/',
+    '/index.html',
+    '/styles.css',
+    '/main.js',
+    // Agregar otros recursos estáticos
+];
+
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(urlsToCache))
+    );
+});
+
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => response || fetch(event.request))
+    );
+});
+        function handleContactUs() {
+            const phoneNumber = '3016497697'; // Aquí debes ingresar tu número de WhatsApp
+            window.open(`https://api.whatsapp.com/send?phone=${phoneNumber}`, '_blank');
+        }
+
+        function openModal() {
+            document.getElementById('modalContainer').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modalContainer').style.display = 'none';
+        }
+
+        function handleCheckPin() {
+            const pin = document.getElementById('pinInput').value;
+            if (pin === '25008') {
+                closeModal();
+                localStorage.setItem('pin', pin); // Guarda el PIN en el almacenamiento local del navegador
+                window.location.href = 'URL_DE_LA_PANTALLA_DE_LA_MESA'; // Redirige a la pantalla de la mesa
+            } else {
+                console.log('Pin incorrecto');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fútbol en Vivo FTAPPGAME</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-gradient-to-r from-indigo-800 to-indigo-600 p-4">
+        <div class="container mx-auto">
+            <h1 class="text-white text-2xl font-bold text-center">Fútbol en Vivo</h1>
+            <p id="lastUpdate" class="text-white text-sm text-center mt-2"></p>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4">
+        <div class="flex flex-wrap gap-4 mb-6" id="leagueButtons">
+            <button class="league-btn bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors" data-league="PL">Premier League</button>
+            <button class="league-btn bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors" data-league="PD">La Liga</button>
+            <button class="league-btn bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors" data-league="BL1">Bundesliga</button>
+            <button class="league-btn bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors" data-league="SA">Serie A</button>
+            <button class="league-btn bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors" data-league="FL1">Ligue 1</button>
+            <button class="league-btn bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors" data-league="CAFCL">Copa Libertadores</button>
+            <button class="league-btn bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors" data-league="CL">Champions League</button>
+            <button class="league-btn bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors" data-league="BSA">Liga Colombia</button>
+        </div>
+
+        <div id="matches" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="col-span-full text-center">Cargando partidos...</div>
+        </div>
+    </div>
+    <nav class="bg-gradient-to-r from-indigo-800 to-indigo-600 p-4">
+        <div class="container mx-auto">
+            <h1 class="text-white text-2xl font-bold text-center">Resultados de Fútbol</h1>
+            <p class="text-white text-center text-sm mt-2">1-8 Enero 2025</p>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Premier League -->
+            <div class="bg-white rounded-lg p-4 shadow hover:shadow-lg transition-shadow">
+                <div class="text-indigo-600 font-semibold mb-2">Premier League</div>
+                <div class="space-y-4">
+                    <div class="border-b pb-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm md:text-base">Tottenham</span>
+                            <span class="font-bold mx-2">1 - 0</span>
+                            <span class="text-sm md:text-base">Burnley</span>
+                        </div>
+                        <div class="text-sm text-gray-500 text-center mt-1">05/01/25 - FA Cup</div>
+                    </div>
+                    <div class="border-b pb-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm md:text-base">Crystal Palace</span>
+                            <span class="font-bold mx-2">0 - 0</span>
+                            <span class="text-sm md:text-base">Everton</span>
+                        </div>
+                        <div class="text-sm text-gray-500 text-center mt-1">05/01/25 - FA Cup</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- La Liga -->
+            <div class="bg-white rounded-lg p-4 shadow hover:shadow-lg transition-shadow">
+                <div class="text-indigo-600 font-semibold mb-2">La Liga</div>
+                <div class="space-y-4">
+                    <div class="border-b pb-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm md:text-base">Osasuna</span>
+                            <span class="font-bold mx-2">1 - 1</span>
+                            <span class="text-sm md:text-base">Almería</span>
+                        </div>
+                        <div class="text-sm text-gray-500 text-center mt-1">03/01/25</div>
+                    </div>
+                    <div class="border-b pb-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm md:text-base">Sevilla</span>
+                            <span class="font-bold mx-2">2 - 1</span>
+                            <span class="text-sm md:text-base">Athletic Club</span>
+                        </div>
+                        <div class="text-sm text-gray-500 text-center mt-1">04/01/25</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copa del Rey -->
+            <div class="bg-white rounded-lg p-4 shadow hover:shadow-lg transition-shadow">
+                <div class="text-indigo-600 font-semibold mb-2">Copa del Rey</div>
+                <div class="space-y-4">
+                    <div class="border-b pb-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm md:text-base">Salamanca</span>
+                            <span class="font-bold mx-2">0 - 2</span>
+                            <span class="text-sm md:text-base">Real Sociedad</span>
+                        </div>
+                        <div class="text-sm text-gray-500 text-center mt-1">07/01/25</div>
+                    </div>
+                    <div class="border-b pb-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm md:text-base">Arandina</span>
+                            <span class="font-bold mx-2">1 - 3</span>
+                            <span class="text-sm md:text-base">Real Madrid</span>
+                        </div>
+                        <div class="text-sm text-gray-500 text-center mt-1">06/01/25</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Serie A -->
+            <div class="bg-white rounded-lg p-4 shadow hover:shadow-lg transition-shadow">
+                <div class="text-indigo-600 font-semibold mb-2">Serie A</div>
+                <div class="space-y-4">
+                    <div class="border-b pb-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm md:text-base">Bologna</span>
+                            <span class="font-bold mx-2">1 - 0</span>
+                            <span class="text-sm md:text-base">Genoa</span>
+                        </div>
+                        <div class="text-sm text-gray-500 text-center mt-1">05/01/25</div>
+                    </div>
+                    <div class="border-b pb-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm md:text-base">Inter</span>
+                            <span class="font-bold mx-2">2 - 1</span>
+                            <span class="text-sm md:text-base">Verona</span>
+                        </div>
+                        <div class="text-sm text-gray-500 text-center mt-1">06/01/25</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bundesliga -->
+            <div class="bg-white rounded-lg p-4 shadow hover:shadow-lg transition-shadow">
+                <div class="text-indigo-600 font-semibold mb-2">Bundesliga</div>
+                <div class="text-center text-gray-500 py-4">
+                    Receso de invierno hasta el 12 de enero
+                </div>
+            </div>
+
+            <!-- Liga BetPlay -->
+            <div class="bg-white rounded-lg p-4 shadow hover:shadow-lg transition-shadow">
+                <div class="text-indigo-600 font-semibold mb-2">Liga BetPlay 2025-I</div>
+                <div class="text-center text-gray-500 py-4">
+                    Inicio de temporada próximamente
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const API_KEY = 'f7268f03ecc54a47bfa88f0f60ff0d54'; // Reemplaza con tu API key de football-data.org
+        const BASE_URL = 'https://api.football-data.org/v4';
+
+        const COMPETITIONS = {
+            PL: 2021,  // Premier League
+            PD: 2014,  // La Liga
+            BL1: 2002, // Bundesliga
+            SA: 2019,  // Serie A
+            FL1: 2015, // Ligue 1
+            CAFCL: 2101, // Copa Libertadores
+            CL: 2001,  // Champions League
+            BSA: 2023  // Liga Colombia
+        };
+
+        async function fetchMatchesByCompetition(competitionId) {
+            try {
+                const response = await fetch(`${BASE_URL}/competitions/${competitionId}/matches?status=LIVE`, {
+                    headers: {
+                        'X-Auth-Token': API_KEY
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.matches || [];
+            } catch (error) {
+                console.error('Error fetching matches:', error);
+                return [];
+            }
+        }
+
+        function createMatchCard(match) {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow';
+
+            const status = match.status === 'PAUSED' ? 'Medio Tiempo' : 
+                          match.status === 'IN_PLAY' ? 'En Vivo' : match.status;
+
+            card.innerHTML = `
+                <div class="text-sm text-indigo-600 font-semibold mb-2">${match.competition.name}</div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold">${match.homeTeam.name}</span>
+                    <span class="text-xl font-bold mx-4">${match.score.fullTime.home ?? 0} - ${match.score.fullTime.away ?? 0}</span>
+                    <span class="font-bold">${match.awayTeam.name}</span>
+                </div>
+                <div class="flex justify-between text-sm text-gray-500">
+                    <span>${status}</span>
+                    <span>${match.minute ? match.minute + '\'' : ''}</span>
+                </div>
+            `;
+
+            return card;
+        }
+
+        async function updateMatches(selectedLeague = null) {
+            const matchesContainer = document.getElementById('matches');
+            matchesContainer.innerHTML = '<div class="col-span-full text-center">Cargando partidos...</div>';
+
+            let allMatches = [];
+            const leaguesToFetch = selectedLeague ? 
+                [COMPETITIONS[selectedLeague]] : 
+                Object.values(COMPETITIONS);
+
+            for (const competitionId of leaguesToFetch) {
+                const matches = await fetchMatchesByCompetition(competitionId);
+                allMatches = [...allMatches, ...matches];
+            }
+
+            matchesContainer.innerHTML = '';
+
+            if (allMatches.length === 0) {
+                matchesContainer.innerHTML = '<div class="col-span-full text-center text-gray-600">No hay partidos en vivo en este momento</div>';
+                return;
+            }
+
+            allMatches.forEach(match => {
+                matchesContainer.appendChild(createMatchCard(match));
+            });
+
+            document.getElementById('lastUpdate').textContent = 
+                `Última actualización: ${new Date().toLocaleTimeString()}`;
+        }
+
+        // Event listeners para los botones de liga
+        document.querySelectorAll('.league-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const league = button.dataset.league;
+                document.querySelectorAll('.league-btn').forEach(btn => {
+                    btn.classList.toggle('bg-indigo-800', btn === button);
+                });
+                updateMatches(league);
+            });
+        });
+
+        // Cargar todos los partidos inicialmente
+        updateMatches();
+
+        // Actualizar cada minuto
+        setInterval(() => {
+            const activeButton = document.querySelector('.league-btn.bg-indigo-800');
+            const selectedLeague = activeButton ? activeButton.dataset.league : null;
+            updateMatches(selectedLeague);
+        }, 60000);
+    </script>
+</body>
+</html>

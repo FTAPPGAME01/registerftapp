@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAURICIOGAME - Pantalla de Inicio</title>
+    <style>
+        /* Estilos CSS */
+        body {
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('./assents/Diseño sin título (5).png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 310px;
+        }
+
+        .startButton {
+            background-color: transparent;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 30px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            margin-bottom: -2px; /* Espacio entre los botones */
+        }
+
+        .startButton:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Estilos para el modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+        }
+
+        /* Botón de cierre del modal */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Contenedor de botones -->
+    <div class="button-container">
+        <!-- Botón para iniciar -->
+        <a class="startButton" href="./homepage.html">Iniciar</a>
+
+        <!-- Botón para mostrar el modal -->
+        <button class="startButton" onclick="showModal()">Administrador</button>
+    </div>
+
+    <!-- Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <p>Por favor ingresa el PIN:</p>
+            <input type="text" id="pinInput">
+            <button onclick="checkPin()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        // Implementar lazy loading para scripts externos
+const loadScript = (src) => {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.body.appendChild(script);
+    });
+};
+
+// Cachear elementos del DOM
+const domElements = {};
+const cacheDOM = () => {
+    const elements = [
+        'googleServicesModal',
+        'saldoModal',
+        'saldoButton',
+        'closeSaldoModal',
+        'saldoInfo',
+        'puntosRegistrarse',
+        'insufficientBalanceModal',
+        'rulesModal',
+        'playersModal',
+        'registerModal',
+        'registrationForm',
+        'loginForm'
+    ];
+    
+    elements.forEach(id => {
+        domElements[id] = document.getElementById(id);
+    });
+};
+
+// Implementar debounce para funciones frecuentes
+const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+};
+
+// Optimizar el almacenamiento local usando batch operations
+const storage = {
+    batch: {},
+    timeout: null,
+    
+    set: function(key, value) {
+        this.batch[key] = value;
+        this.scheduleSave();
+    },
+    
+    scheduleSave: function() {
+        if (this.timeout) clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => this.saveBatch(), 1000);
+    },
+    
+    saveBatch: function() {
+        for (const [key, value] of Object.entries(this.batch)) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+        this.batch = {};
+    }
+};
+
+// Optimizar la gestión de jugadores
+class PlayerManager {
+    constructor() {
+        this.players = new Map();
+        this.loadFromStorage();
+    }
+
+    loadFromStorage() {
+        try {
+            const savedPlayers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+            Object.entries(savedPlayers).forEach(([username, data]) => {
+                this.players.set(username, data);
+            });
+        } catch (error) {
+            console.error('Error loading players:', error);
+            this.players.clear();
+        }
+    }
+
+    saveToStorage() {
+        storage.set('registeredUsers', Object.fromEntries(this.players));
+    }
+
+    addPlayer(username, data) {
+        this.players.set(username, data);
+        this.saveToStorage();
+    }
+}
+
+// Implementar sistema de caché para datos frecuentes
+const gameCache = {
+    data: new Map(),
+    
+    set: function(key, value, ttl = 300000) { // TTL default 5 minutos
+        this.data.set(key, {
+            value,
+            expires: Date.now() + ttl
+        });
+    },
+    
+    get: function(key) {
+        const item = this.data.get(key);
+        if (!item) return null;
+        if (Date.now() > item.expires) {
+            this.data.delete(key);
+            return null;
+        }
+        return item.value;
+    }
+};
+
+// Optimizar la carga inicial
+document.addEventListener('DOMContentLoaded', async () => {
+    // Cachear elementos DOM
+    cacheDOM();
+    
+    // Cargar scripts externos de forma asíncrona
+    try {
+        await Promise.all([
+            loadScript('https://connect.facebook.net/en_US/sdk.js'),
+            // Agregar otros scripts externos aquí
+        ]);
+    } catch (error) {
+        console.error('Error loading external scripts:', error);
+    }
+    
+    // Inicializar el juego
+    const playerManager = new PlayerManager();
+    loadRegisteredPlayers();
+    loadGameState();
+    startGame();
+});
+
+// Optimizar actualizaciones de UI
+const updateUI = debounce(() => {
+    renderGameState();
+    updateTurnIndicator();
+    renderInfo();
+}, 100);
+
+// Implementar Service Worker para caché de assets
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+            console.log('ServiceWorker registered');
+        })
+        .catch(error => {
+            console.error('ServiceWorker registration failed:', error);
+        });
+}
+
+// Service Worker para cachear assets
+const CACHE_NAME = 'ftappgame-v1';
+const urlsToCache = [
+    '/',
+    '/index.html',
+    '/styles.css',
+    '/main.js',
+    // Agregar otros recursos estáticos
+];
+
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(urlsToCache))
+    );
+});
+
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => response || fetch(event.request))
+    );
+});
+        // Función para mostrar el modal
+        function showModal() {
+            document.getElementById('adminModal').style.display = 'block';
+        }
+
+        // Función para cerrar el modal
+        function closeModal() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        // Función para verificar el PIN y redirigir si es correcto
+        function checkPin() {
+            var pin = document.getElementById('pinInput').value;
+            if (pin === '25008') {
+                window.location.href = './chatbot.html';
+            } else {
+                alert('PIN incorrecto. Por favor, intenta de nuevo.');
+            }
+        }
+    </script>
+</body>
+</html>

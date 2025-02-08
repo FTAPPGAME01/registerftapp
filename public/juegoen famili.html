@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>MAURICIOGAME - Juego En Familia</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .splash-container {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('./assents/Diseño sin título (5).png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .startButton {
+            background-color: transparent;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 30px;
+            text-align: center;
+        }
+
+        .startButton:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .startButtonText {
+            color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Estilos para la pantalla de juego */
+        .game-container {
+            /* Ocultar la pantalla de juego por defecto */
+            height: 100%;
+            background-image: url('https://img.freepik.com/vector-premium/patron-abstracto-geometrico_153454-2906.jpg');
+            background-size: cover;
+            background-position: center;
+            position: relative; /* Agregamos posición relativa */
+            z-index: 1; /* Aseguramos que esté sobre el fondo */
+        }
+        .game-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Fondo gris semi-transparente */
+            z-index: -1; /* Lo ponemos detrás de los elementos de la mesa */
+        }
+
+        .container {
+            height: calc(100% - 120px); /* Ajuste para evitar superposición */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 120px; /* Espacio para el menú */
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .cell {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .cell.disabled {
+            background-color: #888;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            position: absolute;
+            top: 20px;
+            width: 90%;
+            text-align: center;
+            display: none;
+            border-radius: 40px;
+            padding: 10px;
+            left: 12px;
+           
+        }
+
+        .alert-win {
+            background-color: greenyellow; /* Fondo verde para alerta de ganar */
+        }
+
+        .alert-lose {
+            background-color: red; /* Fondo rojo para alerta de perder */
+        }
+
+        .alertText {
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .info {
+            position: relative;
+            margin-top: -170px;
+            width: 100%;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .player-info {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .clock {
+            font-size: 24px;
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        .pass-turn-button {
+            position: absolute;
+            top: 620px;
+            right: 20px;
+            background-color: #ffcc00;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            right:34%;
+        }
+
+        #exitButton {
+            position: absolute;
+            top: 20px;
+            left: 80%;
+            background-color: #ffcc00;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #resetButton {
+            background-color: transparent;
+        }
+
+        /* Colores de las fichas */
+        .blue-diamond {
+            background-color: blue;
+        }
+
+        .green-diamond {
+            background-color: green;
+        }
+
+        .yellow-gold {
+            background-color: yellow;
+        }
+
+        .red-gold {
+            background-color: red;
+        }
+
+        .red-ruby {
+            background-color: red;
+        }
+
+        .yellow-ruby {
+            background-color: yellow;
+        }
+
+        .green-trophy {
+            background-color: green;
+        }
+
+        .blue-trophy {
+            background-color: blue;
+        }
+
+        /* Indicador de turno */
+        .turn-indicator {
+            position: absolute;
+            top: 50px; /* Ajusta la posición vertical según sea necesario */
+            left: 50%; /* Centra horizontalmente */
+            transform: translateX(-50%); /* Centra horizontalmente */
+            background-color: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente blanco */
+            padding: 10px 20px; /* Espaciado interno */
+            border-radius: 5px; /* Bordes redondeados */
+            font-size: 18px; /* Tamaño del texto */
+            font-weight: bold; /* Negrita */
+        }
+/* Estilos para los modales */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6); /* Fondo semi-transparente */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* Sombra */
+    width: 80%;
+    max-width: 500px; /* Ancho máximo */
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    transition: color 0.3s ease; /* Transición de color */
+}
+
+.close:hover,
+.close:focus {
+    color: #333; /* Cambio de color al pasar el cursor */
+    text-decoration: none;
+    cursor: pointer;
+}
+ /* Estilos para los botones */
+ .action-button-container {
+    position: absolute;
+    top: -20px; /* Ajusta según el espacio deseado desde la parte superior */
+    left: 20px; /* Ajusta según el espacio deseado desde la izquierda */
+}
+
+ .action-button {
+        background-color: #00ff1a; /* Color de fondo */
+        color: #050505; /* Color del texto */
+        padding: 10px 20px; /* Espaciado interno */
+        border-radius: 5px; /* Bordes redondeados */
+        border: none; /* Sin borde */
+        cursor: pointer; /* Cambio de cursor al pasar el ratón */
+        margin: 5px; /* Margen entre botones */
+        
+        
+    }
+
+    .action-button:hover {
+        background-color: #ffdb4d; /* Cambio de color al pasar el ratón */
+    }
+    </style>
+</head>
+<body>
+<!-- Pantalla de juego -->
+<div class="game-container">
+    <div class="game-background"></div>
+     <!-- <button id="resetButton" onclick="handleReset()">Reiniciar Mesa</button> -->
+    <button id="exitButton" onclick="saveAndExit()">Salir</button>
+    <button id="muteButton" onclick="toggleMute()">Mutar/Demutar Música</button>
+   
+    <div class="turn-indicator" id="turnIndicator">Turno de <span id="currentPlayerName">Ruperto</span> - Puntaje: <span id="currentPlayerScore">100000</span></div>
+    <div class="container">
+        <div class="row" id="diamond-row"></div>
+        <div class="row" id="gold-row"></div>
+        <div class="row" id="ruby-row"></div>
+        <div class="row" id="trophy-row"></div>
+    </div>
+    <div class="alert" id="alert"></div>
+    <div class="info" id="info"></div>
+    <div class="pass-turn-button" onclick="confirmPassTurn()">Pasar Turno</div>
+</div>
+<audio id="clickSound">
+    <source src="./assents/collect-points-190037.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+    
+</audio>
+<!-- <audio id="alertSound">
+    <source src="https://s19.aconvert.com/convert/p3r68-cdx67/adxal-fdis1.mp3" type="audio/mpeg">
+    Tu navegador no soporta el elemento de audio.
+</audio> -->
+<div id="pinModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePinModal()">&times;</span>
+        <h2>Ingrese el PIN para pasar el turno</h2>
+        <input type="password" id="pinInput" placeholder="Ingrese el PIN">
+        <button onclick="verifyPin()">Confirmar</button>
+    </div>
+</div>
+
+<!-- Modal para ingresar el PIN y eliminar puntos -->
+<!-- Modal para mostrar el puntaje del jugador -->
+<div id="scoreModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Puntaje de Jugador</h2>
+        <div id="playerScore"></div>
+    </div>
+</div>
+
+<!-- Modal para confirmar la eliminación de puntos -->
+<div id="deletePointsModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Eliminar Puntos</h2>
+        <input type="password" id="deletePinInput" placeholder="Ingrese el PIN">
+        <button onclick="confirmDeletePoints()">Confirmar</button>
+        <div id="selectedPlayer"></div>
+    </div>
+</div>
+  
+  <!-- Modal para mostrar las fichas tomadas por el jugador -->
+  <div id="takenTilesModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Fichas Tomadas por el Jugador</h2>
+      <p id="takenTiles"></p>
+    </div>
+  </div>
+  
+  <audio id="backgroundMusic" loop autoplay>
+    <source src="./assents/Burgundy - Fashion Jive (freetouse.com).mp3" type="audio/mpeg">
+    Tu navegador no soporta el elemento de audio.
+</audio>
+  
+<script>
+     const toggleMute = () => {
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        if (backgroundMusic.paused) {
+            backgroundMusic.play(); // Inicia la reproducción si está pausada
+        } else {
+            backgroundMusic.pause(); // Pausa la reproducción si está reproduciendo
+        }
+    };
+
+    
+    let score = {
+        'Ruperto': 0,
+        'Juan': 0,
+        'Mauricio': 0,
+        'Jugador 4': 0,
+        'Jugador 5': 0,
+        'Jugador 6': 0,
+        'Jugador 7': 0,
+        'Jugador 8': 0
+    };
+    let initialScore = {
+        'Ruperto': 0,
+        'Juan': 0,
+        'Mauricio': 0,
+        'Jugador 4': 0,
+        'Jugador 5': 0,
+        'Jugador 6': 0,
+        'Jugador 7': 0,
+        'Jugador 8': 0
+    };
+    let turnCount = 1;
+    let timeLeft = 10;
+    let disableBoard = false;
+    let diamondStates = [
+        {available: true, emoji: '💎'},
+        {available: true, emoji: '💎'},
+        {available: true, emoji: '☀️'},
+        {available: true, emoji: '☀️'}
+    ];
+    let goldBarStates = [
+        {available: true, emoji: '💰'},
+        {available: true, emoji: '💰'},
+        {available: true, emoji: '🥇'},
+        {available: true, emoji: '🥇'}
+    ];
+    let rubyStates = [
+        {available: true, emoji: '🔴'},
+        {available: true, emoji: '🔴'},
+        {available: true, emoji: '🍀'},
+        {available: true, emoji: '🍀'}
+    ];
+    let trophyStates = [
+        {available: true, emoji: '💚'},
+        {available: true, emoji: '💚'},
+        {available: true, emoji: '🏆'},
+        {available: true, emoji: '🏆'}
+    ];
+    let takenRowsByPlayer = {
+        'Ruperto': [],
+        'Ateneo': [],
+        'Sanson': [],
+        'Dalila': [],
+        'Afrodita': [],
+        'Jugador 6': [],
+        'Jugador 7': [],
+        'Jugador 8': []
+    };
+    let takenTilesByPlayer = {
+    'Ruperto': { won: [], lost: [] },
+    'Juan': { won: [], lost: [] },
+    'Mauricio': { won: [], lost: [] },
+    'Jugador 4': { won: [], lost: [] },
+    'Jugador 5': { won: [], lost: [] },
+    'Jugador 6': { won: [], lost: [] },
+    'Jugador 7': { won: [], lost: [] },
+    'Jugador 8': { won: [], lost: [] }
+};
+
+    let takenCount = 0;
+    const localStorageName = 'gameStateComponent2'; // Nombre del espacio de almacenamiento local
+    const startGame = () => {
+    document.querySelector('.splash-container').style.display = 'none';
+    document.querySelector('.game-container').style.display = 'block';
+    renderGameState();
+    startTurnTimer(); // Llama a la función startTurnTimer para iniciar el temporizador automáticamente
+    updatePlayerInfo();
+};
+const updatePlayerInfo = () => {
+        const playerInfoElement = document.getElementById('playerInfo');
+        playerInfoElement.textContent = `Puntajes:\nRuperto: ${score['Ruperto']}\nFidelina: ${score['Fidelina']}\nEufemio: ${score['Eufemio']}\nTranquilina: ${score['Tranquilina']}`;
+    };
+    
+    const passTurn = () => {
+    // Cambiar al siguiente jugador
+    const players = Object.keys(score);
+    const currentPlayerIndex = players.indexOf(currentPlayer);
+    const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    currentPlayer = players[nextPlayerIndex];
+    updatePlayerInfo(); // Actualizar la información del jugador
+    updateTurnIndicator(); // Actualizar el indicador de turno
+};
+//------------------alerta de turno--------------------------
+const confirmPassTurn = () => {
+    const confirmation = confirm("¿Estás seguro que quieres cambiar de turno?");
+    if (confirmation) {
+        handlePassTurn(); // Si el usuario confirma, pasa el turno
+    } else {
+        // Si el usuario cancela, no hace nada
+    }
+    // Reproducir el sonido de clic
+    reproducirSonidoAlerta();
+};
+const reproducirSonidoAlerta = () => {
+            const alertSound = document.getElementById('alertSound');
+            alertSound.currentTime = 0; // Reiniciar el sonido si ya está reproduciéndose
+            alertSound.play();
+        };
+//-----------------------------------------------------------
+
+const showScoreModal = () => {
+    const modal = document.getElementById('scoreModal');
+    const playerScore = document.getElementById('playerScore');
+    
+    // Construir la lista de puntajes por jugador
+    let playersHtml = '';
+    Object.keys(score).forEach(player => {
+        playersHtml += `
+            <div>
+                <p>${player}: ${score[player]}</p>
+                <button onclick="openDeletePointsModal('${player}')" class="delete-button">🗑️ Eliminar puntos</button>
+            </div>
+        `;
+    });
+
+    playerScore.innerHTML = playersHtml;
+    modal.style.display = 'block';
+};
+
+const openDeletePointsModal = (player) => {
+    const modal = document.getElementById('deletePointsModal');
+    const selectedPlayer = document.getElementById('selectedPlayer');
+    selectedPlayer.textContent = `¿Estás seguro de que deseas eliminar los puntos de ${player}?`;
+    modal.style.display = 'block';
+    modal.dataset.playerName = player; // Guardar el nombre del jugador en un atributo de datos del modal
+};
+
+const confirmDeletePoints = () => {
+    const pinInput = document.getElementById('deletePinInput').value.trim(); // Eliminar espacios en blanco al inicio y al final
+ // Eliminar espacios en blanco al inicio y al final
+    const pin = '12345'; // PIN correcto
+
+    console.log("PIN ingresado:", pinInput); // Agregar esta línea para depurar
+
+    if (pinInput === pin) {
+        const modal = document.getElementById('deletePointsModal');
+        const playerName = modal.dataset.playerName; // Obtener el nombre del jugador del atributo de datos
+        // Realizar la eliminación de puntos para el jugador
+        score[playerName] = 0;
+        // Cerrar el modal de eliminación de puntos
+        modal.style.display = 'none';
+        // Actualizar la lista de puntajes
+        showScoreModal();
+    } else {
+        alert('PIN incorrecto');
+    }
+};
+
+
+
+const showTakenTilesModal = () => {
+    const modal = document.getElementById('takenTilesModal');
+    const takenTiles = document.getElementById('takenTiles');
+    let tilesHtml = '';
+
+    // Iterar sobre los jugadores
+    Object.keys(takenTilesByPlayer).forEach(player => {
+        let totalWon = 0;
+        let totalLost = 0;
+
+        // Calcular el total ganado y perdido por el jugador
+        takenTilesByPlayer[player].won.forEach(tile => {
+            totalWon += (tile.emoji === '💎' || tile.emoji === '☀️') ? 20000 : 0;
+            totalWon += (tile.emoji === '💰' || tile.emoji === '🥇') ? 20000 : 0;
+            totalWon += (tile.emoji === '🔴' || tile.emoji === '🍀') ? 20000 : 0;
+            totalWon += (tile.emoji === '💚' || tile.emoji === '🏆') ? 20000 : 0;
+        });
+
+        takenTilesByPlayer[player].lost.forEach(tile => {
+            totalLost += (tile.emoji === '💎' || tile.emoji === '☀️') ? 23000 : 0;
+            totalLost += (tile.emoji === '💰' || tile.emoji === '🥇') ? 23000 : 0;
+            totalLost += (tile.emoji === '🔴' || tile.emoji === '🍀') ? 23000 : 0;
+            totalLost += (tile.emoji === '💚' || tile.emoji === '🏆') ? 23000 : 0;
+        });
+
+        // Mostrar el total ganado y perdido por el jugador
+        tilesHtml += `<p>${player}:</p>`;
+        tilesHtml += `<p>Total Ganado: ${totalWon}</p>`;
+        tilesHtml += `<p>Total Perdido: ${totalLost}</p>`;
+
+        // Mostrar las fichas ganadas por el jugador
+        tilesHtml += `<p>Fichas Ganadas:</p>`;
+        takenTilesByPlayer[player].won.forEach(tile => {
+            tilesHtml += `<p>${tile.emoji} - ${tile.row}</p>`;
+        });
+
+        // Mostrar las fichas perdidas por el jugador
+        tilesHtml += `<p>Fichas Perdidas:</p>`;
+        takenTilesByPlayer[player].lost.forEach(tile => {
+            tilesHtml += `<p>${tile.emoji} - ${tile.row}</p>`;
+        });
+    });
+
+    takenTiles.innerHTML = tilesHtml;
+    modal.style.display = 'block';
+};
+
+
+    // Función para renderizar la lista de jugadores y sus puntajes
+    const renderPlayersList = () => {
+        const playersList = document.getElementById('playersList');
+        playersList.innerHTML = ''; // Limpiar la lista antes de renderizarla de nuevo
+
+        Object.keys(score).forEach(player => {
+            const playerScore = score[player];
+            const playerElement = document.createElement('div');
+            playerElement.innerHTML = `<p>${player}: ${playerScore}</p>`;
+            const deleteButton = document.createElement('button');
+            deleteButton.innerHTML = '<img src="trash_icon.png" alt="Eliminar">';
+            deleteButton.onclick = () => deletePlayerPoints(player); // Función para eliminar puntos del jugador
+            playerElement.appendChild(deleteButton);
+            playersList.appendChild(playerElement);
+        });
+    };
+
+    // Función para eliminar puntos de un jugador
+    const deletePlayerPoints = (player) => {
+        // Aquí debes implementar la lógica para eliminar los puntos del jugador
+        // Por ejemplo, podrías establecer su puntaje en 0
+        score[player] = 0;
+        renderPlayersList(); // Actualizar la lista después de eliminar los puntos
+    };
+
+    // Función para abrir la confirmación de eliminación de puntos
+    const openDeletePointsConfirmation = () => {
+        const pinInput = document.getElementById('pinInput').value;
+        if (pinInput === '12345') {
+            // Si el PIN es correcto, abrir el modal de confirmación
+            // Aquí podrías mostrar un mensaje de confirmación o simplemente confirmar con el usuario
+            // Por simplicidad, simplemente abriremos el modal de confirmación
+            const modal = document.getElementById('deletePointsModal');
+            modal.style.display = 'none';
+            openDeletePointsModal();
+        } else {
+            // Si el PIN es incorrecto, podrías mostrar un mensaje de error o simplemente no hacer nada
+            // Por simplicidad, no haremos nada aquí
+        }
+    };
+
+   
+// Cerrar modal al hacer clic en la 'x'
+const closeButtons = document.getElementsByClassName('close');
+for (const closeButton of closeButtons) {
+    closeButton.onclick = () => {
+        const modal = closeButton.parentElement.parentElement;
+        modal.style.display = 'none';
+    };
+}
+
+// Cerrar modal al hacer clic fuera del contenido
+window.onclick = (event) => {
+        const modals = document.getElementsByClassName('modal');
+        for (const modal of modals) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    };
+
+const handlePassTurn = () => {
+    console.log('Pasando turno');
+    
+    clearInterval(turnTimer); // Detener el temporizador antes de iniciar uno nuevo
+    
+    // Lista de jugadores en orden
+    const players = ['Ruperto', 'Juan', 'Mauricio', 'Jugador 4', 'Jugador 5', 'Jugador 6', 'Jugador 7', 'Jugador 8', 'Jugador 9', 'Jugador 10'];
+
+    // Obtener el índice del jugador actual en la lista
+    const currentPlayerIndex = players.indexOf(currentPlayer);
+    
+    // Obtener el índice del próximo jugador en la lista (circular)
+    const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
+
+    // Establecer el próximo jugador como el jugador actual
+    currentPlayer = players[nextPlayerIndex];
+
+    timeLeft = 10;
+    renderGameState();
+    updateTurnIndicator(); // Actualiza el indicador de turno después de cambiar de jugador
+    startTurnTimer(); // Iniciar el temporizador nuevamente para el nuevo turno
+};
+
+
+    const getRandomPosition = () => {
+        const rows = ['diamond-row', 'gold-row', 'ruby-row', 'trophy-row'];
+        const randomRow = rows[Math.floor(Math.random() * rows.length)];
+        const randomCell = Math.floor(Math.random() * 4);
+        return { row: randomRow, cell: randomCell };
+    };
+    const resetGameTable = () => {
+    console.log('Reiniciando la mesa de juego');
+    currentPlayer = 'Ruperto';
+    turnCount = 1;
+    timeLeft = 10;
+    disableBoard = false;
+    takenCount = 0;
+
+    // Restablecer y mezclar los estados de las fichas
+    diamondStates = shuffleAndResetStates([
+        {emoji: '💎'}, {emoji: '💎'}, {emoji: '☀️'}, {emoji: '☀️'}
+    ]);
+    goldBarStates = shuffleAndResetStates([
+        {emoji: '💰'}, {emoji: '💰'}, {emoji: '🥇'}, {emoji: '🥇'}
+    ]);
+    rubyStates = shuffleAndResetStates([
+        {emoji: '🔴'}, {emoji: '🔴'}, {emoji: '🍀'}, {emoji: '🍀'}
+    ]);
+    trophyStates = shuffleAndResetStates([
+        {emoji: '💚'}, {emoji: '💚'}, {emoji: '🏆'}, {emoji: '🏆'}
+    ]);
+
+    takenRowsByPlayer = {
+        'Ruperto': [], 
+        'Juan': [], 
+        'Mauricio': [],
+        'Jugador 4': [],
+        'Jugador 5': [],
+        'Jugador 6': [],
+        'Jugador 7': [],
+        'Jugador 8': []
+    };
+    renderGameState();
+};
+
+    const renderGameState = () => {
+        console.log('Renderizando estado del juego');
+        renderBoard();
+        renderInfo();
+    };
+
+    const renderBoard = () => {
+        console.log('Renderizando tablero de juego');
+        renderRow(diamondStates, 'diamond-row');
+        renderRow(goldBarStates, 'gold-row');
+        renderRow(rubyStates, 'ruby-row');
+        renderRow(trophyStates, 'trophy-row');
+    };
+
+    const renderRow = (rowArray, rowId) => {
+    const rowElement = document.getElementById(rowId);
+    rowElement.innerHTML = '';
+    rowArray.forEach((item, index) => {
+        const cellElement = document.createElement('div');
+        cellElement.className = `cell ${getColorClass(item)}`;
+        
+        // Verificar si el ítem está disponible y no se ha tomado por el jugador
+        if (item.available) {
+            cellElement.innerHTML = `<span>${item.emoji}</span>`;
+            cellElement.onclick = () => handlePress(item.emoji, index, rowArray, rowId); // Agregar evento de clic
+        } else {
+            // Si no está disponible, muestra una celda gris sin emoji
+            cellElement.classList.add('disabled');
+        }
+        
+
+        rowElement.appendChild(cellElement);
+    });
+};
+
+
+    const getColorClass = (item) => {
+        if (item.emoji === '💎' || item.emoji === '☀️') return 'blue-diamond';
+        if (item.emoji === '💰' || item.emoji === '🥇') return 'yellow-gold';
+        if (item.emoji === '🔴' || item.emoji === '🍀') return 'red-ruby';
+        if (item.emoji === '💚' || item.emoji === '🏆') return 'green-trophy';
+    };
+
+    
+    const renderInfo = () => {
+    const infoElement = document.getElementById('info');
+    infoElement.innerHTML = `
+        
+        <div class="action-button-container">
+            <button onclick="openDeletePointsModal()" class="action-button">🗑️ Eliminar Puntos</button>
+           
+        </div>
+    `;
+     // <button onclick="showTakenTilesModal()" class="action-button">Ver Fichas Tomadas</button>
+    // <div class="player-info">
+    //         <p>Puntaje: ${score[currentPlayer]}</p>
+    //         <p class="clock" id="clock">Tiempo restante: ${timeLeft}</p>
+    //     </div>
+};
+
+
+
+    const WINNING_SCORE = 500000; // Puntaje necesario para ganar
+
+    const getRandomEmoji = (change) => {
+    // Array de emojis de ganar y perder
+    const emojisWin = ['😊', '😄'];
+    const emojisLose = ['😢', '😡'];
+
+    // Selección aleatoria entre los emojis de ganar o perder
+    return change > 0 ? emojisWin[Math.floor(Math.random() * emojisWin.length)] : emojisLose[Math.floor(Math.random() * emojisLose.length)];
+};
+
+
+//-------------------------------------------------------------------------------------------
+const playClickSound = () => {
+    const clickSound = document.getElementById('clickSound');
+    clickSound.currentTime = 0; // Reinicia el sonido si ya está reproduciéndose
+    clickSound.play();
+};
+
+
+// const initialScore = 100000; 
+const gainPoints = 20000;
+const losePoints = 20000;
+const handlePress = (emoji, index, rowArray, rowId) => {
+    if (!rowArray[index].available || disableBoard) return;
+
+    // Definir los puntos de ganancia y pérdida
+    let change;
+    if (emoji === '💎' || emoji === '💰' || emoji === '🔴' || emoji === '💚') {
+        change = gainPoints;
+        showAlert(`${currentPlayer} ganó ${gainPoints} puntos.`, 'win');
+    } else {
+        change = -losePoints;
+        showAlert(`${currentPlayer} perdió ${Math.abs(losePoints)} puntos.`, 'lose');
+    }
+
+    // Actualizar el puntaje
+    score[currentPlayer] += change;
+    
+    // Actualizar inmediatamente el puntaje en la interfaz
+    const currentPlayerScoreElement = document.getElementById('currentPlayerScore');
+    currentPlayerScoreElement.textContent = score[currentPlayer];
+
+    rowArray[index].available = false;
+    takenRowsByPlayer[currentPlayer].push(rowArray[index]);
+    takenCount++;
+
+    if (takenCount === 16) {
+        resetGameTable();
+    }
+
+    if (score[currentPlayer] >= WINNING_SCORE) {
+        showAlert(`${currentPlayer} ganó el juego en familia!`, 'win');
+        disableBoard = true;
+    }
+
+    renderGameState();
+    playClickSound();
+};
+
+//----------------------------------------------------------------------------------------
+
+
+
+
+const showAlert = (message, type) => {
+        const alertElement = document.getElementById('alert');
+        alertElement.innerText = message;
+        alertElement.classList.add(type === 'win' ? 'alert-win' : 'alert-lose');
+        alertElement.classList.remove(type === 'win' ? 'alert-lose' : 'alert-win');
+        alertElement.style.display = 'block';
+        setTimeout(() => {
+            alertElement.style.display = 'none';
+        }, 3000);
+    };
+
+    const shuffleAndResetStates = (stateArray) => {
+    const emojis = stateArray.map(item => item.emoji);
+    shuffleArray(emojis);
+    return emojis.map(emoji => ({ available: true, emoji: emoji }));
+};
+
+
+    const shuffleArray = (array) => {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    };
+
+    let turnTimer;
+
+    const startTurnTimer = () => {
+    timeLeft = 10;
+    updateClockDisplay();
+    turnTimer = setInterval(() => {
+        if (timeLeft > 0) {
+            timeLeft--;
+            updateClockDisplay();
+        } else {
+            clearInterval(turnTimer);
+            handlePassTurn();
+        }
+    }, 1000);
+};
+
+    
+const updateClockDisplay = () => {
+    const clockElement = document.getElementById('clock');
+    clockElement.innerText = `Tiempo restante: ${timeLeft}`;
+};
+
+
+
+const saveGameState = () => {
+    const gameState = {
+        currentPlayer: currentPlayer,
+        score: score,
+        diamondStates: diamondStates,
+        goldBarStates: goldBarStates,
+        rubyStates: rubyStates,
+        trophyStates: trophyStates,
+        takenRowsByPlayer: takenRowsByPlayer,
+        takenCount: takenCount
+    };
+
+    localStorage.setItem(localStorageName, JSON.stringify(gameState));
+    alert('Estado del juego guardado exitosamente.');
+};
+
+    const saveAndExit = () => {
+        saveGameState(); // Guardar el estado del juego antes de salir
+        window.location.href = 'homepage.html'; // Redireccionar a la página de inicio
+    };
+
+    const loadGameState = () => {
+    const savedGameState = localStorage.getItem(localStorageName);
+    if (savedGameState) {
+        const gameState = JSON.parse(savedGameState);
+        currentPlayer = gameState.currentPlayer;
+        score = gameState.score;
+        diamondStates = gameState.diamondStates;
+        goldBarStates = gameState.goldBarStates;
+        rubyStates = gameState.rubyStates;
+        trophyStates = gameState.trophyStates;
+        takenRowsByPlayer = gameState.takenRowsByPlayer;
+        takenCount = gameState.takenCount;
+    } else {
+        // Si no hay ningún estado de juego guardado, establecemos el primer jugador como currentPlayer
+        currentPlayer = 'Ruperto'; // Cambiar al jugador inicial deseado
+    }
+};
+
+
+const updateTurnIndicator = () => {
+    const currentPlayerNameElement = document.getElementById('currentPlayerName');
+    const currentPlayerScoreElement = document.getElementById('currentPlayerScore');
+    currentPlayerNameElement.textContent = currentPlayer;
+    currentPlayerScoreElement.textContent = score[currentPlayer]; // Actualizar el puntaje del jugador actual
+};
+    const exitGame = () => {
+        if (confirm('¿Estás seguro de que deseas salir del juego?')) {
+            location.reload();
+        }
+    };
+
+    const handleScoreChange = (player, change) => {
+    score[player] += change;
+    // Limitar el puntaje mínimo a 0
+    if (score[player] < 0) {
+        score[player] = 0;
+        }
+    };
+    const calculateScoreDifference = (player) => {
+        return score[player] - initialScore[player];
+    };
+    
+
+    window.onload = () => {
+    loadGameState();
+    renderGameState();
+    updateTurnIndicator(); // Mostrar el primer jugador al cargar el juego
+    startTurnTimer(); // Inicia el temporizador automáticamente al cargar el juego
+    const currentPlayerNameElement = document.getElementById('currentPlayerName');
+    const currentPlayerScoreElement = document.getElementById('currentPlayerScore');
+    currentPlayerNameElement.textContent = currentPlayer;
+    currentPlayerScoreElement.textContent = score[currentPlayer];
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    backgroundMusic.play(); // Iniciar la música de fondo al cargar la página
+};
+
+    
+</script>
+</body>
+</html>
